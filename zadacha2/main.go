@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math"
+	"sync"
 )
 
 type Shape interface {
@@ -47,7 +48,6 @@ func (t Triangle) Area() float64 {
 	p := t.Perimeter() / 2
 	return math.Sqrt(p * (p - t.A) * (p - t.B) * (p - t.C))
 }
-
 func TotalAreaAndPerimeter(shapes []Shape) (area float64, perimeter float64) {
 	for _, s := range shapes {
 		area += s.Area()
@@ -55,7 +55,52 @@ func TotalAreaAndPerimeter(shapes []Shape) (area float64, perimeter float64) {
 	}
 	return
 }
+func TotalAreaAndPerimeterParallel(shapes []Shape, n int) (float64, float64) {
+	if len(shapes) == 0 {
+		return 0, 0
+	}
+	if n <= 0 {
+		n = 1
+	}
+	if n > len(shapes) {
+		n = len(shapes)
+	}
 
+	chunkSize := (len(shapes) + n - 1) / n
+
+	var (
+		wg         sync.WaitGroup
+		mu         sync.Mutex
+		totalArea  float64
+		totalPerim float64
+	)
+
+	for i := 0; i < len(shapes); i += chunkSize {
+		end := i + chunkSize
+		if end > len(shapes) {
+			end = len(shapes)
+		}
+
+		wg.Add(1)
+		go func(part []Shape) {
+			defer wg.Done()
+
+			localArea, localPerim := 0.0, 0.0
+			for _, s := range part {
+				localArea += s.Area()
+				localPerim += s.Perimeter()
+			}
+
+			mu.Lock()
+			totalArea += localArea
+			totalPerim += localPerim
+			mu.Unlock()
+		}(shapes[i:end])
+	}
+
+	wg.Wait()
+	return totalArea, totalPerim
+}
 func main() {
 	shapes := []Shape{
 		Circle{Radius: 1},
@@ -63,18 +108,13 @@ func main() {
 		Triangle{A: 3, B: 4, C: 5},
 	}
 
-	area, perimeter := TotalAreaAndPerimeter(shapes)
+	const parts = 3
 
-	fmt.Printf("Фигур:    %d\n", len(shapes))
-	fmt.Printf("Площадь:  %.4f\n", area)
-	fmt.Printf("Периметр: %.4f\n", perimeter)
+	seqArea, seqPerim := TotalAreaAndPerimeter(shapes)
+	parArea, parPerim := TotalAreaAndPerimeterParallel(shapes, parts)
 
-	expectedArea := math.Pi + 12 + 6
-	expectedPerimeter := 2*math.Pi + 14 + 12
-
-	fmt.Printf("Ожидалось площадь:  %.4f\n", expectedArea)
-	fmt.Printf("Ожидалось периметр: %.4f\n", expectedPerimeter)
-	fmt.Printf("Совпадает: %v\n",
-		math.Abs(area-expectedArea) < 1e-9 &&
-			math.Abs(perimeter-expectedPerimeter) < 1e-9)
+	fmt.Printf("Последовательно: площадь=%.4f, периметр=%.4f\n", seqArea, seqPerim)
+	fmt.Printf("Параллельно (%d): площадь=%.4f, периметр=%.4f\n", parts, parArea, parPerim)
+	fmt.Printf("Совпадает:       %v\n",
+		math.Abs(seqArea-parArea) < 1e-9 && math.Abs(seqPerim-parPerim) < 1e-9)
 }
