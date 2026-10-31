@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>Файлы</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <strong>Хранилище файлов</strong>
+            <div>
+                {{.User.Login}} ({{.User.Role}}) | <a href="/logout">Выйти</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        {{if eq .User.Role "admin"}}
+            <div style="text-align: right; margin-bottom: 20px;">
+                <a href="/upload" class="btn">+ Загрузить новый файл</a>
+            </div>
+        {{end}}
+
+        <h2>Папки</h2>
+        <div class="card-grid">
+            {{range .Dirs}}
+                <div class="card">
+                    <a href="/browse?dir={{.Name}}">{{.Name}}</a>
+                    <p style="color: #666; margin-top: 10px;">{{.Count}} файлов</p>
+                </div>
+            {{end}}
+        </div>
+    </div>
+</body>
+</html>

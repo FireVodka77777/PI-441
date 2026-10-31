@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>Папка {{.Dir}}</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <a href="/" style="font-weight: bold;">← На главную</a>
+            <div>
+                {{.User.Login}} ({{.User.Role}}) | <a href="/logout">Выйти</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>Папка: {{.Dir}}</h1>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Имя файла</th>
+                    <th>Размер</th>
+                    <th style="text-align: right;">Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range .Files}}
+                <tr>
+                    <td>{{.Name}}</td>
+                    <td>{{.Size}} байт</td>
+                    <td style="text-align: right;">
+                        {{if or (eq $.User.Role "viewer") (eq $.User.Role "admin")}}
+                            <a href="/view?dir={{$.Dir}}&file={{.Name}}" style="margin-right: 10px;">Просмотр</a>
+                        {{end}}
+                        
+                        {{if or (eq $.User.Role "downloader") (eq $.User.Role "admin")}}
+                            <a href="/download?dir={{$.Dir}}&file={{.Name}}">Скачать</a>
+                        {{end}}
+                    </td>
+                </tr>
+                {{else}}
+                <tr>
+                    <td colspan="3" style="text-align: center; color: #888;">Папка пуста</td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

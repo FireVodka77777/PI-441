@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>Вход</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container" style="max-width: 400px; margin-top: 100px;">
+        <h1 style="text-align: center;">Вход на сайт</h1>
+        {{if .Error}}<div class="error">{{.Error}}</div>{{end}}
+        <form method="post" action="/login">
+            <input type="text" name="login" placeholder="Логин" required>
+            <input type="password" name="password" placeholder="Пароль" required>
+            <button type="submit" style="width: 100%;">Войти</button>
+        </form>
+    </div>
+</body>
+</html>

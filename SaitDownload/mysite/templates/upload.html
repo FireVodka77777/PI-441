@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>Загрузка</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <a href="/" style="font-weight: bold;">← На главную</a>
+            <div>{{.User.Login}} ({{.User.Role}})</div>
+        </div>
+    </div>
+
+    <div class="container" style="max-width: 500px; margin-top: 60px;">
+        <h1>Загрузить файл</h1>
+        <form method="post" action="/upload" enctype="multipart/form-data">
+            <input type="file" name="file" required>
+            <button type="submit" style="width: 100%;">Загрузить</button>
+        </form>
+    </div>
+</body>
+</html>
